@@ -32,8 +32,11 @@ if ($config['debug']) {
 $whoops->register();
 
 $routeDispatcher = \FastRoute\simpleDispatcher(function(RouteCollector $r) {
-    $r->addRoute('GET', '/hello', ['Arspex\Controller\MainController', 'hello']);
-    $r->addRoute('GET', '/world', ['Arspex\Controller\MainController', 'world']);
+    $routes = include('routes.php');
+    foreach ($routes as $route) {
+        list($httpMethod, $route, $handler) = $route;
+        $r->addRoute($httpMethod, $route, $handler);
+    }
 });
 
 $request = $injector->make(Request::class);
