@@ -2,15 +2,32 @@
 
 namespace Arspex\Controller;
 
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+
 class MainController
 {
+    private $request;
+    private $response;
+
+    public function __construct(Request $request, Response $response)
+    {
+        $this->request = $request;
+        $this->response = $response;
+    }
+
+    public function __destruct()
+    {
+        $this->response->send();
+    }
+
     public function hello()
     {
-        echo 'hello';
+        $this->response->setContent('hello');
     }
 
     public function world()
     {
-        echo 'world';
+        $this->response->setContent('world');
     }
 }

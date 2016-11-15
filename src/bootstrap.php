@@ -4,6 +4,8 @@ namespace Arspex;
 
 use FastRoute\Dispatcher;
 use FastRoute\RouteCollector;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Whoops\Handler\PrettyPageHandler;
 
 require __DIR__ . '/../vendor/autoload.php';
@@ -29,10 +31,13 @@ $routeDispatcher = \FastRoute\simpleDispatcher(function(RouteCollector $r) {
     $r->addRoute('GET', '/world', ['Arspex\Controller\MainController', 'world']);
 });
 
-$httpMethod = $_SERVER['REQUEST_METHOD'];
-$uri = $_SERVER['REQUEST_URI'];
+$request = Request::createFromGlobals();
+$response = new Response();
 
-$routeInfo = $routeDispatcher->dispatch($httpMethod, $uri);
+$routeInfo = $routeDispatcher->dispatch(
+    $request->getMethod(),
+    $request->getRequestUri()
+);
 
 switch ($routeInfo[0]) {
     case Dispatcher::NOT_FOUND:
@@ -44,7 +49,7 @@ switch ($routeInfo[0]) {
     case Dispatcher::FOUND:
         list($controllerClass, $method) = $routeInfo[1];
         $vars = $routeInfo[2];
-        $controller = new $controllerClass();
+        $controller = new $controllerClass($request, $response);
         $controller->$method($vars);
         break;
 }
