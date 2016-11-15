@@ -6,6 +6,7 @@ use Auryn\Injector;
 use FastRoute\Dispatcher;
 use FastRoute\RouteCollector;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Whoops\Handler\PrettyPageHandler;
 
 require __DIR__ . '/../vendor/autoload.php';
@@ -40,6 +41,10 @@ $routeDispatcher = \FastRoute\simpleDispatcher(function(RouteCollector $r) {
 });
 
 $request = $injector->make(Request::class);
+/**
+ * @var Response $response;
+ */
+$response = $injector->make(Response::class);
 
 $routeInfo = $routeDispatcher->dispatch(
     $request->getMethod(),
@@ -48,10 +53,12 @@ $routeInfo = $routeDispatcher->dispatch(
 
 switch ($routeInfo[0]) {
     case Dispatcher::NOT_FOUND:
-        echo '404 - Page not found';
+        $response->setStatusCode(Response::HTTP_NOT_FOUND);
+        $response->setContent('404 - Page not found');
         break;
     case Dispatcher::METHOD_NOT_ALLOWED:
-        echo '405 - Method not allowed';
+        $response->setStatusCode(Response::HTTP_METHOD_NOT_ALLOWED);
+        $response->setContent('405 - Method not allowed');
         break;
     case Dispatcher::FOUND:
         list($controllerClass, $method) = $routeInfo[1];
@@ -60,3 +67,5 @@ switch ($routeInfo[0]) {
         $controller->$method($vars);
         break;
 }
+
+$response->send();

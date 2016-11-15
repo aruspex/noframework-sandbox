@@ -16,11 +16,6 @@ class MainController
         $this->response = $response;
     }
 
-    public function __destruct()
-    {
-        $this->response->send();
-    }
-
     public function hello()
     {
         $this->response->setContent('hello');
