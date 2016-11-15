@@ -25,12 +25,8 @@ if ($config['debug']) {
 $whoops->register();
 
 $routeDispatcher = \FastRoute\simpleDispatcher(function(RouteCollector $r) {
-    $r->addRoute('GET', '/hello', function () {
-        echo 'hello';
-    });
-    $r->addRoute('GET', '/world', function () {
-        echo 'world';
-    });
+    $r->addRoute('GET', '/hello', ['Arspex\Controller\MainController', 'hello']);
+    $r->addRoute('GET', '/world', ['Arspex\Controller\MainController', 'world']);
 });
 
 $httpMethod = $_SERVER['REQUEST_METHOD'];
@@ -46,8 +42,9 @@ switch ($routeInfo[0]) {
         echo '405 - Method not allowed';
         break;
     case Dispatcher::FOUND:
-        $handler = $routeInfo[1];
+        list($controllerClass, $method) = $routeInfo[1];
         $vars = $routeInfo[2];
-        $handler($vars);
+        $controller = new $controllerClass();
+        $controller->$method($vars);
         break;
 }
