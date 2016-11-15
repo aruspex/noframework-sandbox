@@ -2,6 +2,8 @@
 
 namespace Arspex;
 
+use FastRoute\Dispatcher;
+use FastRoute\RouteCollector;
 use Whoops\Handler\PrettyPageHandler;
 
 require __DIR__ . '/../vendor/autoload.php';
@@ -22,4 +24,30 @@ if ($config['debug']) {
 }
 $whoops->register();
 
-throw new \Exception("Some exception");
+$routeDispatcher = \FastRoute\simpleDispatcher(function(RouteCollector $r) {
+    $r->addRoute('GET', '/hello', function () {
+        echo 'hello';
+    });
+    $r->addRoute('GET', '/world', function () {
+        echo 'world';
+    });
+});
+
+$httpMethod = $_SERVER['REQUEST_METHOD'];
+$uri = $_SERVER['REQUEST_URI'];
+
+$routeInfo = $routeDispatcher->dispatch($httpMethod, $uri);
+
+switch ($routeInfo[0]) {
+    case Dispatcher::NOT_FOUND:
+        echo '404 - Page not found';
+        break;
+    case Dispatcher::METHOD_NOT_ALLOWED:
+        echo '405 - Method not allowed';
+        break;
+    case Dispatcher::FOUND:
+        $handler = $routeInfo[1];
+        $vars = $routeInfo[2];
+        $handler($vars);
+        break;
+}
