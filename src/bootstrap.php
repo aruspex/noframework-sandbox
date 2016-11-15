@@ -2,15 +2,20 @@
 
 namespace Arspex;
 
+use Auryn\Injector;
 use FastRoute\Dispatcher;
 use FastRoute\RouteCollector;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Whoops\Handler\PrettyPageHandler;
 
 require __DIR__ . '/../vendor/autoload.php';
 
 $config = require('config.php');
+
+/**
+ * @var Injector $injector
+ */
+$injector = require('injector.php');
 
 /**
  * Register the error handler
@@ -31,8 +36,7 @@ $routeDispatcher = \FastRoute\simpleDispatcher(function(RouteCollector $r) {
     $r->addRoute('GET', '/world', ['Arspex\Controller\MainController', 'world']);
 });
 
-$request = Request::createFromGlobals();
-$response = new Response();
+$request = $injector->make(Request::class);
 
 $routeInfo = $routeDispatcher->dispatch(
     $request->getMethod(),
@@ -49,7 +53,7 @@ switch ($routeInfo[0]) {
     case Dispatcher::FOUND:
         list($controllerClass, $method) = $routeInfo[1];
         $vars = $routeInfo[2];
-        $controller = new $controllerClass($request, $response);
+        $controller = $injector->make($controllerClass);
         $controller->$method($vars);
         break;
 }
