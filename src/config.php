@@ -3,5 +3,6 @@
 namespace Arspex;
 
 return [
-    'debug' => true
+    'debug' => true,
+    'templates_dir' => __DIR__ . '/../templates'
 ];
